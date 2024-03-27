@@ -1,5 +1,7 @@
 # The BLUE Initiative
-=============
+
+Welcome, weary traveller, to our humble corner of the internet. Get some rest, eggs are almost ready.
+
 ## What is BLUE?
 
 A project aimed to invoke and promote creativity in myself and other collaborators. Open source and open hardware. 
