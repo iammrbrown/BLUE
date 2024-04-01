@@ -12,7 +12,7 @@ Bitmap creation and analisys - this would allow for easy conversion between grap
 
 ## To do:
 
-Main obstacle of the idea are the specific in bitmap representation between MS Paint and other software. Digressions in things like header encoding or color representation could glitch the image interpretation in all stages.
+Implementation of a grapical representation of a labirynth in memory for bugtesting purposes.
 
 
-*Last edited: 27/03/2024*
+*Last edited: 01/04/2024*
