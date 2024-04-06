@@ -4,15 +4,15 @@ An attempt to actually finish a proper robotics project.
 
 ## On the table:
 
-Creation of a system aimed for creation and debugging of test labirynths. Best if related to the exploration and pathfinding testbench in the later stages.
+Implementation and testing of a simple exploration algorythm.
 
 ## Current idea:
 
-Bitmap creation and analisys - this would allow for easy conversion between graphical and code-based representation of the labirytnh. This approach could also utilise elements already created in previous projects.
+The algorythm will be focusing on the recognition of unnecessary labirynth parts and marking them as "to be ignored" in order to minimise the exploration time.
 
 ## To do:
 
-Implementation of a grapical representation of a labirynth in memory for bugtesting purposes.
-
+Implementation of a simplified exploration and floodfill algorythms for bug testing and improvement.
+Also - testing materials - we need them labirynths.
 
 *Last edited: 01/04/2024*
