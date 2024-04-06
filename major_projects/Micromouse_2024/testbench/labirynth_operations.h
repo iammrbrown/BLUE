@@ -18,6 +18,10 @@
 #define HUE_STEP 10
 #endif
 
+#ifndef EXP_STEPS
+#define EXP_STEPS 3000
+#endif
+
 #ifndef MAP
 #define MAP "../t_data/MM_base.bmp"
 #endif
@@ -61,15 +65,7 @@ typedef struct{
 	uint8_t B;
 }pixel;
 
-void import_labirynth (std::string, Tile [][LAB_SIZE]);
-void print_path (std::string, Tile [][LAB_SIZE]);
-void interpret_buffer (char [], char []); 
-void draw_wall (pixel [][LAB_SIZE*4+1], char, int, int);
-
-void A_right_handed (Tile [][LAB_SIZE]);
-void A_left_handed (Tile [][LAB_SIZE]);
-
-pixel hue_rotation (unsigned int);
+/* SAMPLE ALGORYTHMS */
 
 void A_right_handed (Tile labirynth[][LAB_SIZE]){
 	char facing = 'N';
@@ -79,7 +75,7 @@ void A_right_handed (Tile labirynth[][LAB_SIZE]){
 	int y = 0;
 	int step = 0;
 
-	while(labirynth[x][y].END != true && step <= 3000){
+	while(labirynth[x][y].END != true && step <= EXP_STEPS){
 		labirynth[x][y].step = step;
 
 		std::cout << "At: [ " << x << ", " << y << "]; Facing: " << facing << "; N: " << labirynth[x][y].N << ", E: " << labirynth[x][y].E << ", S: " << labirynth[x][y].S << ", W: " << labirynth[x][y].W << std::endl;
@@ -132,6 +128,12 @@ void A_right_handed (Tile labirynth[][LAB_SIZE]){
 		if(x < 0 || x > 15 || y < 0 || y > 15){break;}
 		step++;
 	}
+
+	if(labirynth[x][y].END == true){
+		std::cout << "Finished in " << step << " steps.\n";
+	}else{
+		std::cout << "DNF in " << EXP_STEPS << " steps.\n";
+	}
 }
 
 void A_left_handed (Tile labirynth[][LAB_SIZE]){
@@ -142,7 +144,7 @@ void A_left_handed (Tile labirynth[][LAB_SIZE]){
 	int y = 0;
 	int step = 0;
 
-	while(labirynth[x][y].END != true && step <= 3000){
+	while(labirynth[x][y].END != true && step <= EXP_STEPS){
 		labirynth[x][y].step = step;
 
 		std::cout << "At: [ " << x << ", " << y << "]; Facing: " << facing << "; N: " << labirynth[x][y].N << ", E: " << labirynth[x][y].E << ", S: " << labirynth[x][y].S << ", W: " << labirynth[x][y].W << std::endl;
@@ -195,7 +197,59 @@ void A_left_handed (Tile labirynth[][LAB_SIZE]){
 		if(x < 0 || x > 15 || y < 0 || y > 15){break;}
 		step++;
 	}
+	
+	if(labirynth[x][y].END == true){
+		std::cout << "Finished in " << step << " steps.\n";
+	}else{
+		std::cout << "DNF in " << EXP_STEPS << " steps.\n";
+	}
 }
+
+/* ALGORYTHM OPERATIONS */
+
+bool check_walls (Tile labirynth[][LAB_SIZE], int x, int y, char side){
+	switch(side){
+	case 'N':
+		return labirynth[x][y].N;
+		break;
+	case 'E':
+		return labirynth[x][y].E;
+		break;
+	case 'S':
+		return labirynth[x][y].S;
+		break;	
+	case 'W':
+		return labirynth[x][y].W;
+		break;
+	default:
+		std::cout << "Mamy problem: CHK_WALLS - BAD SIDE" << std::endl;
+		return 0;
+	}
+}
+
+int check_distant_walls (Tile labirynth[][LAB_SIZE], int x, int y, char side){
+	int d = 0;
+
+	switch(side){
+	case 'N':
+		while(labirynth[x][y+d].N != true){d++;}
+		break;
+	case 'E':
+		while(labirynth[x+d][y].E != true){d++;}
+		break;
+	case 'S':
+		while(labirynth[x][y-d].S != true){d++;}
+		break;
+	case 'W':
+		while(labirynth[x-d][y].W != true){d++;}
+		break;
+	default:	
+		std::cout << "Mamy problem: CHK_D_WALLS - BAD SIDE" << std::endl;
+	}
+	return d;
+}
+
+/* BITMAP OPERATIONS */
 
 void interpret_buffer (char in[], char out[]){
 	for(int i = 0; i < LAB_SIZE; i++){ //there's a correlation between a labirynth size and the amount of doubled chars (chars holding values of 2 pixels)
@@ -322,6 +376,7 @@ void import_labirynth (std::string path, Tile labirynth[][LAB_SIZE]){
 
 	}else std::cout << "The file bloody crashed! \n"; 
 }
+
 
 void draw_wall(pixel buffer[][LAB_SIZE*4+1], char side, int x, int y){
 	switch(side){
