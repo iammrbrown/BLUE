@@ -1,7 +1,21 @@
+#define MAP "../t_data/MM_TEST1.bmp"
+
 #include <iostream>
+#include "labirynth_operations.h"
 
-using namespace std;
+int main (int argc, char *argv[]){
 
-int main(){
-	cout << "Hello, world!" << endl;
+	std::cout << "Hello, world! \n";
+	
+
+	std::cout << "Labirynth import testing \n";
+
+	Tile labirynth[LAB_SIZE][LAB_SIZE];
+	import_labirynth(MAP, labirynth);
+ 	
+	A_left_handed(labirynth);
+
+	print_path("./path.bmp", labirynth);
+
+	return 0;
 }

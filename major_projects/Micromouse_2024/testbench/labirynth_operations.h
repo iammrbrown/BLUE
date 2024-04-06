@@ -25,6 +25,9 @@
 /* 	In this file there is a set of functions and solutions related to operations on
 	BMP files representing test labirynths for the Micromouse projects.				*/
 
+#ifndef LABIRYTNH_OP_H
+#define LABIRYTNH_OP_H
+
 typedef struct {
 	bool N;
 	bool E;
@@ -67,23 +70,6 @@ void A_right_handed (Tile [][LAB_SIZE]);
 void A_left_handed (Tile [][LAB_SIZE]);
 
 pixel hue_rotation (unsigned int);
-
-int main (int argc, char *argv[]){
-
-	std::cout << "Hello, world! \n";
-	
-
-	std::cout << "Labirynth import testing \n";
-
-	Tile labirynth[LAB_SIZE][LAB_SIZE];
-	import_labirynth(MAP, labirynth);
- 	
-	A_left_handed(labirynth);
-
-	print_path("./path.bmp", labirynth);
-
-	return 0;
-}
 
 void A_right_handed (Tile labirynth[][LAB_SIZE]){
 	char facing = 'N';
@@ -475,3 +461,5 @@ pixel hue_rotation (unsigned int hue){
 	std::cout << (int) rgb.R << " " << (int) rgb.G << " " << (int) rgb.B << "\n";
 	return rgb;
 }
+
+#endif /* LABIRYNTH_OP_H */
