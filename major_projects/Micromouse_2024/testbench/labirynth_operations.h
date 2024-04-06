@@ -29,8 +29,8 @@
 /* 	In this file there is a set of functions and solutions related to operations on
 	BMP files representing test labirynths for the Micromouse projects.				*/
 
-#ifndef LABIRYTNH_OP_H
-#define LABIRYTNH_OP_H
+#ifndef TILE
+#define TILE
 
 typedef struct {
 	bool N;
@@ -40,7 +40,14 @@ typedef struct {
 	bool START = false;
 	bool END = false;
 	int step = 0;
+	int flood = 0;
+	bool IGNORED = false;
 } Tile;
+
+#endif
+
+#ifndef LABIRYTNH_OP_H
+#define LABIRYTNH_OP_H
 
 typedef struct{								
 	uint32_t 	size = 0;					// rozmiar pliku w bajtach				
@@ -64,6 +71,53 @@ typedef struct{
 	uint8_t G;
 	uint8_t B;
 }pixel;
+
+pixel hue_rotation (unsigned int hue){
+	hue = hue % 1530;
+	pixel rgb;
+
+	if(hue < 255){
+		hue = hue % 255;
+		rgb.R = 255;
+		rgb.G = hue;
+		rgb.B = 0;
+		std::cout << "1: ";
+	}else if(hue < 510){
+		hue = hue % 255;
+		rgb.R = 255-hue;
+		rgb.G = 255;
+		rgb.B = 0;
+		std::cout << "2: ";
+	}else if(hue < 765){
+		hue = hue % 255;
+		rgb.R = 0;
+		rgb.G = 255;
+		rgb.B = hue;
+		std::cout << "3: ";
+	}else if(hue < 1020){
+		hue = hue % 255;
+		rgb.G = 255-hue;
+		rgb.B = 255;
+		rgb.R = 0;
+		std::cout << "4: ";
+	}else if(hue < 1275){
+		hue = hue % 255;
+		rgb.R = hue;
+		rgb.G = 0;
+		rgb.B = 255;
+		std::cout << "5: ";
+	}else{
+		hue = hue % 255;
+		rgb.B = 255-hue;
+		rgb.R = 255;
+		rgb.G = 0;
+		std::cout << "6: ";
+	}
+
+
+	std::cout << (int) rgb.R << " " << (int) rgb.G << " " << (int) rgb.B << "\n";
+	return rgb;
+}
 
 /* SAMPLE ALGORYTHMS */
 
@@ -197,7 +251,7 @@ void A_left_handed (Tile labirynth[][LAB_SIZE]){
 		if(x < 0 || x > 15 || y < 0 || y > 15){break;}
 		step++;
 	}
-	
+
 	if(labirynth[x][y].END == true){
 		std::cout << "Finished in " << step << " steps.\n";
 	}else{
@@ -205,48 +259,34 @@ void A_left_handed (Tile labirynth[][LAB_SIZE]){
 	}
 }
 
-/* ALGORYTHM OPERATIONS */
+/* LABIRYNTH OPERATIONS */
 
-bool check_walls (Tile labirynth[][LAB_SIZE], int x, int y, char side){
-	switch(side){
-	case 'N':
-		return labirynth[x][y].N;
-		break;
-	case 'E':
-		return labirynth[x][y].E;
-		break;
-	case 'S':
-		return labirynth[x][y].S;
-		break;	
-	case 'W':
-		return labirynth[x][y].W;
-		break;
-	default:
-		std::cout << "Mamy problem: CHK_WALLS - BAD SIDE" << std::endl;
-		return 0;
+void flood_std_labirynth (Tile labirynth[][LAB_SIZE]){
+	labirynth[7][7].flood = 1;
+	labirynth[8][7].flood = 1;
+	labirynth[7][8].flood = 1;
+	labirynth[8][8].flood = 1;
+
+	bool filled = false;
+	int active = 1;
+
+	while(!filled){
+		filled = true;
+		for(int x = 0; x < LAB_SIZE; x++){
+			for(int y = 0; y < LAB_SIZE; y++){
+				if(labirynth[x][y].flood == active && labirynth[x][y].IGNORED == false){
+					if(labirynth[x][y].N == false && labirynth[x][y+1].flood == 0){labirynth[x][y+1].flood = active+1;}
+					if(labirynth[x][y].E == false && labirynth[x+1][y].flood == 0){labirynth[x+1][y].flood = active+1;}
+					if(labirynth[x][y].S == false && labirynth[x][y-1].flood == 0){labirynth[x][y-1].flood = active+1;}
+					if(labirynth[x][y].W == false && labirynth[x-1][y].flood == 0){labirynth[x-1][y].flood = active+1;}
+					labirynth[x][y].IGNORED = true;
+					filled = false;
+				}
+			}
+		}
+
+		active++;
 	}
-}
-
-int check_distant_walls (Tile labirynth[][LAB_SIZE], int x, int y, char side){
-	int d = 0;
-
-	switch(side){
-	case 'N':
-		while(labirynth[x][y+d].N != true){d++;}
-		break;
-	case 'E':
-		while(labirynth[x+d][y].E != true){d++;}
-		break;
-	case 'S':
-		while(labirynth[x][y-d].S != true){d++;}
-		break;
-	case 'W':
-		while(labirynth[x-d][y].W != true){d++;}
-		break;
-	default:	
-		std::cout << "Mamy problem: CHK_D_WALLS - BAD SIDE" << std::endl;
-	}
-	return d;
 }
 
 /* BITMAP OPERATIONS */
@@ -377,7 +417,6 @@ void import_labirynth (std::string path, Tile labirynth[][LAB_SIZE]){
 	}else std::cout << "The file bloody crashed! \n"; 
 }
 
-
 void draw_wall(pixel buffer[][LAB_SIZE*4+1], char side, int x, int y){
 	switch(side){
 	case 'N':
@@ -410,6 +449,51 @@ void draw_wall(pixel buffer[][LAB_SIZE*4+1], char side, int x, int y){
 		break;
 	default:
 		std::cout << "Mamy problem: DRAW_WALL - BAD SIDE" << std::endl;
+	}
+}
+
+void print_labirynth(std::string path, Tile labirynth[][LAB_SIZE]){
+	BMPHeader header;
+	uint16_t type = 0x4d42;	
+
+	pixel buffer[LAB_SIZE*4+1][LAB_SIZE*4+1];
+	pixel path_hue;
+	uint8_t filler[3] = {0x69, 0x42, 0xff};
+
+	for(int x = 0; x < LAB_SIZE*4+1; x++){
+		for(int y = 0; y < LAB_SIZE*4+1; y++){
+			buffer[x][y].R = 255;
+			buffer[x][y].G = 255;
+			buffer[x][y].B = 255;
+		}
+	}
+
+	std::ofstream output;
+
+	output.open(path, std::ios::binary | std::ios::out);
+	if(output.good() == true){
+
+		for(int x = 0; x < LAB_SIZE; x++){
+			for(int y = 0; y < LAB_SIZE; y++){
+				if(labirynth[x][y].N == true){draw_wall(buffer, 'N', x, y);}
+				if(labirynth[x][y].E == true){draw_wall(buffer, 'E', x, y);}
+				if(labirynth[x][y].S == true){draw_wall(buffer, 'S', x, y);}
+				if(labirynth[x][y].W == true){draw_wall(buffer, 'W', x, y);}
+			}	
+		}
+		
+
+		output.write((char *) &type, sizeof(uint16_t));
+		output.write((char *) &header, sizeof(BMPHeader));
+
+		for(int y = 0; y < LAB_SIZE*4+1; y++){
+			for(int x = 0; x < LAB_SIZE*4+1; x++){
+				output.write((char *) &buffer[x][y], sizeof(pixel));
+			}
+			if((LAB_SIZE*4+1)*3 % 4 != 0){
+				output.write((char *) &filler, (4-((LAB_SIZE*4+1)*3%4))*sizeof(uint8_t));
+			}
+		}
 	}
 }
 
@@ -457,7 +541,6 @@ void print_path(std::string path, Tile labirynth[][LAB_SIZE]){
 
 		output.write((char *) &type, sizeof(uint16_t));
 		output.write((char *) &header, sizeof(BMPHeader));
-		std::cout << sizeof(BMPHeader) ;
 
 		for(int y = 0; y < LAB_SIZE*4+1; y++){
 			for(int x = 0; x < LAB_SIZE*4+1; x++){
@@ -470,51 +553,71 @@ void print_path(std::string path, Tile labirynth[][LAB_SIZE]){
 	}
 }
 
-pixel hue_rotation (unsigned int hue){
-	hue = hue % 1530;
-	pixel rgb;
+void print_path_and_ignored (std::string path, Tile labirynth[][LAB_SIZE]){
 
-	if(hue < 255){
-		hue = hue % 255;
-		rgb.R = 255;
-		rgb.G = hue;
-		rgb.B = 0;
-		std::cout << "1: ";
-	}else if(hue < 510){
-		hue = hue % 255;
-		rgb.R = 255-hue;
-		rgb.G = 255;
-		rgb.B = 0;
-		std::cout << "2: ";
-	}else if(hue < 765){
-		hue = hue % 255;
-		rgb.R = 0;
-		rgb.G = 255;
-		rgb.B = hue;
-		std::cout << "3: ";
-	}else if(hue < 1020){
-		hue = hue % 255;
-		rgb.G = 255-hue;
-		rgb.B = 255;
-		rgb.R = 0;
-		std::cout << "4: ";
-	}else if(hue < 1275){
-		hue = hue % 255;
-		rgb.R = hue;
-		rgb.G = 0;
-		rgb.B = 255;
-		std::cout << "5: ";
-	}else{
-		hue = hue % 255;
-		rgb.B = 255-hue;
-		rgb.R = 255;
-		rgb.G = 0;
-		std::cout << "6: ";
+	BMPHeader header;
+	uint16_t type = 0x4d42;	
+
+	pixel buffer[LAB_SIZE*4+1][LAB_SIZE*4+1];
+	pixel path_hue;
+	uint8_t filler[3] = {0x69, 0x42, 0xff};
+
+	for(int x = 0; x < LAB_SIZE*4+1; x++){
+		for(int y = 0; y < LAB_SIZE*4+1; y++){
+			buffer[x][y].R = 255;
+			buffer[x][y].G = 255;
+			buffer[x][y].B = 255;
+		}
 	}
 
+	std::ofstream output;
 
-	std::cout << (int) rgb.R << " " << (int) rgb.G << " " << (int) rgb.B << "\n";
-	return rgb;
+	output.open(path, std::ios::binary | std::ios::out);
+	if(output.good() == true){
+
+		for(int x = 0; x < LAB_SIZE; x++){
+			for(int y = 0; y < LAB_SIZE; y++){
+				if(labirynth[x][y].N == true){draw_wall(buffer, 'N', x, y);}
+				if(labirynth[x][y].E == true){draw_wall(buffer, 'E', x, y);}
+				if(labirynth[x][y].S == true){draw_wall(buffer, 'S', x, y);}
+				if(labirynth[x][y].W == true){draw_wall(buffer, 'W', x, y);}
+
+				if(labirynth[x][y].step != 0 && labirynth[x][y].START != 1){
+					path_hue = hue_rotation(labirynth[x][y].step*HUE_STEP);
+					std::cout << x << ", " << y << ", st: " << labirynth[x][y].step << " | ";
+					for(int i = 1; i < 4; i++){
+						for(int j = 1; j < 4; j++){
+							buffer[4*x+i][4*y+j] = path_hue;
+						}
+					}
+				}
+				
+				if(labirynth[x][y].IGNORED == true){
+					path_hue.R = 100;
+					path_hue.G = 100;
+					path_hue.B = 100;
+
+					for(int i = 1; i < 4; i += 2){
+						for(int j = 1; j < 4; j += 2){
+							buffer[4*x+i][4*y+j] = path_hue;
+						}
+					}
+				}
+			}
+		}
+
+		output.write((char *) &type, sizeof(uint16_t));
+		output.write((char *) &header, sizeof(BMPHeader));
+
+		for(int y = 0; y < LAB_SIZE*4+1; y++){
+			for(int x = 0; x < LAB_SIZE*4+1; x++){
+				output.write((char *) &buffer[x][y], sizeof(pixel));
+			}
+			if((LAB_SIZE*4+1)*3 % 4 != 0){
+				output.write((char *) &filler, (4-((LAB_SIZE*4+1)*3%4))*sizeof(uint8_t));
+			}
+		}
+	}
 }
 
 #endif /* LABIRYNTH_OP_H */
