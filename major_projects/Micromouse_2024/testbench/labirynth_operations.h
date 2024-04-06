@@ -260,15 +260,32 @@ void A_left_handed (Tile labirynth[][LAB_SIZE]){
 }
 
 /* LABIRYNTH OPERATIONS */
+void update_walls(Tile labirynth[][LAB_SIZE]){
+	for(int x = 0; x < LAB_SIZE; x++){
+		for(int y = 0; y < LAB_SIZE; y++){
+			if(labirynth[x][y].N && y != LAB_SIZE-1){labirynth[x][y+1].S = true;}
+			if(labirynth[x][y].E && x != LAB_SIZE-1){labirynth[x+1][y].W = true;}
+			if(labirynth[x][y].S && y != 0){labirynth[x][y-1].N = true;}
+			if(labirynth[x][y].W && x != 0){labirynth[x-1][y].E = true;}
+		}
+	}
+}
 
 void flood_std_labirynth (Tile labirynth[][LAB_SIZE]){
+	bool filled = false;
+	int active = 1;
+
+	for(int x = 0; x < LAB_SIZE; x++){
+		for(int y = 0; y < LAB_SIZE; y++){
+			labirynth[x][y].flood = 0;
+			labirynth[x][y].IGNORED = false;
+		}
+	}
+
 	labirynth[7][7].flood = 1;
 	labirynth[8][7].flood = 1;
 	labirynth[7][8].flood = 1;
 	labirynth[8][8].flood = 1;
-
-	bool filled = false;
-	int active = 1;
 
 	while(!filled){
 		filled = true;
@@ -286,6 +303,19 @@ void flood_std_labirynth (Tile labirynth[][LAB_SIZE]){
 		}
 
 		active++;
+	}
+}
+
+void print_flood_map (Tile labirynth [][LAB_SIZE]){
+	for(int y = LAB_SIZE-1; y >= 0; y--){
+		for(int x = 0; x < LAB_SIZE; x++){
+			if(labirynth[x][y].flood < 10){
+				std::cout << labirynth[x][y].flood << "  ";
+			}else{
+				std::cout << labirynth[x][y].flood << " ";
+			}
+		}
+		std::cout << "\n";
 	}
 }
 

@@ -90,7 +90,7 @@ void discover_cell (Mouse mouse, Tile sensors[][LAB_SIZE], Tile internal[][LAB_S
 	internal[x][y].W = sensors[x][y].W;
 }
 
-void set_standard_internal(Tile internal[][LAB_SIZE]){
+void set_std_internal(Tile internal[][LAB_SIZE]){
 	for(int x = 0; x < LAB_SIZE; x++){
 		for(int y = 0; y < LAB_SIZE; y++){
 			internal[x][y].N = false;
@@ -113,39 +113,75 @@ void set_standard_internal(Tile internal[][LAB_SIZE]){
 
 /* ROBOT OPERATIONS */
 
-void turn_left(Mouse mouse){
+Mouse turn_left(Mouse mouse){
 	char holder = mouse.front;
 	mouse.front = mouse.left;
 	mouse.left = mouse.rear;
 	mouse.rear = mouse.right;
 	mouse.right = holder;
+	return mouse;
 }
 
-void turn_right(Mouse mouse){
+Mouse turn_right(Mouse mouse){
 	char holder = mouse.front;
 	mouse.front = mouse.right;
 	mouse.right = mouse.rear;
 	mouse.rear = mouse.left;
 	mouse.left = holder;
+	return mouse;
 }
 
-void go_ahead(Mouse mouse){
-	switch(mouse.front){
+Mouse face_direction(Mouse mouse, char dir){
+	switch(dir){
 	case 'N':
-		mouse.y++;
+		mouse.front = 'N';
+		mouse.left = 'W';
+		mouse.rear = 'S';
+		mouse.right = 'E';
 		break;
 	case 'E':
-		mouse.x++;
+		mouse.front = 'E';
+		mouse.left = 'N';
+		mouse.rear = 'W';
+		mouse.right = 'S';
 		break;
 	case 'S':
-		mouse.y--;
+		mouse.front = 'S';
+		mouse.left = 'E';
+		mouse.rear = 'N';
+		mouse.right = 'W';
 		break;
 	case 'W':
-		mouse.x--;
+		mouse.front = 'W';
+		mouse.left = 'S';
+		mouse.rear = 'E';
+		mouse.right = 'N';
+		break;
+	default:
+		std::cout << "Mamy problem: FACE_DIR - BAD FACING\n";
+	}
+	return mouse;
+}
+
+Mouse go_ahead(Mouse mouse){
+	std::cout << "ahead: " << mouse.front << " ";
+	switch(mouse.front){
+	case 'N':
+		mouse.y += 1;
+		break;
+	case 'E':
+		mouse.x += 1;
+		break;
+	case 'S':
+		mouse.y -= 1;
+		break;
+	case 'W':
+		mouse.x -= 1;
 		break;
 	default:
 		std::cout << "Mamy problem: GO_AHEAD - BAD FACING\n";
 	}
+	return mouse;
 }
 
 #endif
