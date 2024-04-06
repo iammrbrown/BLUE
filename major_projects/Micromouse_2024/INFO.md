@@ -15,4 +15,4 @@ The algorythm will be focusing on the recognition of unnecessary labirynth parts
 Implementation of a simplified exploration and floodfill algorythms for bug testing and improvement.
 Also - testing materials - we need them labirynths.
 
-*Last edited: 01/04/2024*
+*Last edited: 06/04/2024*
